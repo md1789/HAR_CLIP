@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dll
+*.dylib
+
+# Virtual environments
+.venv/
+env/
+venv/
+ENV/
+.conda/
+*.egg-info/
+
+# Jupyter/Colab
+.ipynb_checkpoints/
+*.ipynb_save
+
+# Datasets & raw data
+data/
+!data/README.md   # keep a placeholder if you want
+
+# Training outputs
+outputs/
+runs/
+checkpoints/
+logs/
+*.pt
+*.pth
+*.ckpt
+*.bin
+
+# TensorBoard
+events.out.tfevents.*
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Colab & temp
+*.zip
+*.tar
+*.gz
+*.tgz
+*.rar
+*.7z
+*.tmp
+*.swp
