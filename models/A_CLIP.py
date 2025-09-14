@@ -1,32 +1,35 @@
 import torch.nn as nn
-from . import alpha_clip  # uses our self-contained alpha_clip.py
+from transformers import CLIPModel, CLIPProcessor
 from peft import LoraConfig, get_peft_model
 
-
 class A_CLIPWrapper(nn.Module):
-    def __init__(self, num_classes: int, use_lora: bool = True, model_name: str = "ViT-B/16"):
+    def __init__(self, num_classes: int, use_lora: bool = True):
         super().__init__()
+        base_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+        self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
-        # Load AlphaCLIP model + preprocessing transform
-        self.model, self.preprocess = alpha_clip.load(model_name, lora_adapt=use_lora)
-        self.hidden_size = getattr(self.model, "hidden_size", 512)
+        # Grab vision submodules
+        self.vision_model = base_model.vision_model
+        self.vision_encoder = self.vision_model.encoder  # <-- transformer block
 
         if use_lora:
             peft_config = LoraConfig(
                 r=8,
                 lora_alpha=16,
-                target_modules=["q_proj", "v_proj"],  # adjust once internals known
+                target_modules=["q_proj", "v_proj"],
                 lora_dropout=0.1,
                 bias="none",
-                task_type="SEQ_CLS"
+                task_type="FEATURE_EXTRACTION",
             )
-            self.model = get_peft_model(self.model, peft_config)
+            self.vision_encoder = get_peft_model(self.vision_encoder, peft_config)
 
         # Classifier head
-        self.classifier = nn.Linear(self.hidden_size, num_classes)
+        hidden_size = base_model.vision_model.config.hidden_size  # 768 for ViT-B/32
+        self.classifier = nn.Linear(hidden_size, num_classes)
+
 
     def forward(self, pixel_values):
-        vision_outputs = self.model(pixel_values)
-        pooled = vision_outputs["pooler_output"]
-        logits = self.classifier(pooled)
-        return logits
+        # Forward through vision model
+        outputs = self.vision_model(pixel_values=pixel_values)
+        pooled = outputs.pooler_output # shape [B, 768]
+        return self.classifier(pooled)

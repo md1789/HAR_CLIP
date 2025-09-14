@@ -2,6 +2,8 @@ import os
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
+from sklearn.metrics import accuracy_score, f1_score
+import numpy as np
 
 # Default preprocessing (can be overridden by model-specific preprocess)
 default_transform = transforms.Compose([
@@ -32,11 +34,7 @@ def get_dataloader(root: str, split: str, batch_size: int, preprocess=None, shuf
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, num_workers=4)
     return dataloader, dataset
 
-def compute_metrics(preds, labels):
-    """
-    Compute accuracy given predictions and labels.
-    Extend with F1, confusion matrix, etc. later.
-    """
-    correct = (preds == labels).sum().item()
-    total = labels.size(0)
-    return {"accuracy": correct / total}
+def compute_metrics(y_true, y_pred):
+    acc = accuracy_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred, average="weighted")  # handles class imbalance
+    return {"accuracy": acc, "f1": f1}

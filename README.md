@@ -124,7 +124,7 @@ pip install -r requirements.txt
 
 ---
 
-## ▶Usage
+## Usage
 
 ### Training
 Run training with LoRA adapters:

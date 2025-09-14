@@ -17,6 +17,8 @@ from utils.visualization import (
 import csv
 import glob
 import pandas as pd
+from tqdm import tqdm
+import numpy as np
 
 
 def get_next_run_folder(base_dir="outputs", prefix="TRAIN"):
@@ -34,6 +36,14 @@ def train(model_name: str, batch_size: int, epochs: int, lr: float,
           num_classes: int, val_split: float = 0.2, patience: int = 5):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = get_model(model_name, num_classes=num_classes, use_lora=True).to(device)
+
+    # --- Sanity check for LoRA ---
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print(f"\n[LoRA Check] Total params: {total_params:,}")
+    print(f"[LoRA Check] Trainable params: {trainable_params:,}")
+    print(f"[LoRA Check] Percentage trainable: {100 * trainable_params / total_params:.2f}%\n")
+
     preprocess = getattr(model, "preprocess", None)
 
     # Freeze everything except LoRA

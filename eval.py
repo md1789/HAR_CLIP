@@ -20,6 +20,7 @@ from utils.visualization import (
     log_roc_curves_to_tensorboard
 )
 from sklearn.metrics import precision_recall_fscore_support
+import numpy as np
 
 
 def get_latest_checkpoint(base_dir="outputs", prefix="TRAIN"):
