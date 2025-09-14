@@ -63,9 +63,12 @@ def train(model_name: str, batch_size: int, epochs: int, lr: float,
     )
 
     print("Checking dataset...")
-    print(f"Train dataset size: {len(full_dataset)}")
-    print(f"Classes: {full_dataset.classes}")
+    print("Train dataset size:", len(train_dataset))
+    print("Classes:", full_dataset.classes)
+    print("Num classes arg:", num_classes)
 
+    all_labels = [label for _, label in train_dataset]
+    print("Label min:", min(all_labels), "Label max:", max(all_labels))
 
     # Train/Val split
     val_size = int(len(full_dataset) * val_split)
